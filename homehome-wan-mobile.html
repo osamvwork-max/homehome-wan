@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FF8C42">
+<title>ほめほめワン日記</title>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --orange: #FF8C42;
+  --orange2: #FFB347;
+  --orange-soft: #FFE0C0;
+  --orange-pale: #FFF4E8;
+  --pink: #FF6B8A;
+  --pink-soft: #FFD6E0;
+  --pink-pale: #FFF0F4;
+  --brown: #C47A3A;
+  --brown-light: #E8A85C;
+  --cream: #FFFBF5;
+  --cream2: #FFF7EE;
+  --green: #6DC87A;
+  --blue: #6BB8D4;
+  --text: #2D1A0A;
+  --text2: #7A5438;
+  --text3: #B89070;
+  --white: #FFFFFF;
+  --radius: 22px;
+  --radius-sm: 14px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--cream);
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  color: var(--text);
+}
+
+/* ====== APP SHELL ====== */
+#app {
+  display: flex; flex-direction: column;
+  height: 100dvh;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: var(--cream);
+  box-shadow: 0 0 60px rgba(0,0,0,0.12);
+}
+
+/* ====== STATUS BAR AREA ====== */
+.status-bar {
+  height: var(--safe-top);
+  background: var(--orange);
+  flex-shrink: 0;
+}
+
+/* ====== HEADER ====== */
+.app-header {
+  background: linear-gradient(160deg, var(--orange) 0%, var(--orange2) 100%);
+  padding: 14px 20px 16px;
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.app-header::after {
+  content: '';
+  position: absolute; bottom: -20px; right: -20px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.app-header::before {
+  content: '';
+  position: absolute; top: -30px; right: 60px;
+  width: 80px; height: 80px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.header-title {
+  flex: 1;
+}
+.header-title h1 {
+  font-family: 'Kaisei Decol', serif;
+  font-size: 1.35rem; color: white;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  letter-spacing: 0.04em;
+}
+.header-title p {
+  font-size: 0.72rem; color: rgba(255,255,255,0.85);
+  margin-top: 2px;
+}
+.streak-pill {
+  background: rgba(255,255,255,0.22);
+  border-radius: 999px; padding: 7px 13px;
+  text-align: center; backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+.streak-num {
+  font-family: 'Kaisei Decol', serif;
+  font-size: 1.5rem; color: white; line-height: 1;
+}
+.streak-label { font-size: 0.6rem; color: rgba(255,255,255,0.9); }
+
+/* ====== SCROLL AREA ====== */
+.scroll-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* ====== TAB CONTENT ====== */
+.tab-content { display: none; padding: 16px 16px 8px; }
+.tab-content.active { display: block; }
+
+/* ====== BOTTOM NAV ====== */
+.bottom-nav {
+  background: white;
+  border-top: 1.5px solid #F0E0D0;
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+  box-shadow: 0 -4px 20px rgba(196,122,58,0.10);
+}
+.nav-btn {
+  flex: 1; border: none; background: transparent;
+  padding: 10px 4px 8px;
+  cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  transition: all 0.18s; position: relative;
+}
+.nav-btn .nav-icon {
+  font-size: 1.55rem; transition: transform 0.2s;
+  display: block;
+}
+.nav-btn .nav-label {
+  font-size: 0.62rem; color: var(--text3);
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-weight: 500;
+}
+.nav-btn.active .nav-label { color: var(--orange); font-weight: 700; }
+.nav-btn.active .nav-icon { transform: scale(1.15) translateY(-2px); }
+.nav-btn.active::after {
+  content: '';
+  position: absolute; top: 0; left: 20%; right: 20%;
+  height: 3px; background: var(--orange);
+  border-radius: 0 0 4px 4px;
+}
+
+/* ====== PUPPY HERO CARD ====== */
+.puppy-hero {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px 16px 16px;
+  margin-bottom: 14px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 6px 24px rgba(196,122,58,0.13), 0 2px 6px rgba(196,122,58,0.08);
+}
+.puppy-hero-top-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  background: linear-gradient(90deg, var(--orange), var(--pink), var(--blue), var(--green));
+}
+.puppy-hero-inner {
+  display: flex; align-items: flex-end; gap: 10px;
+}
+.puppy-wrap {
+  width: 120px; flex-shrink: 0;
+  display: flex; justify-content: center;
+}
+#puppy-svg { width: 110px; height: 110px; }
+.speech-wrap { flex: 1; }
+.speech-bubble {
+  background: linear-gradient(135deg, var(--pink-pale), var(--orange-pale));
+  border: 2px solid var(--pink-soft);
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 14px;
+  font-size: 0.88rem; font-weight: 700;
+  color: var(--text);
+  line-height: 1.55;
+  min-height: 54px;
+  display: flex; align-items: center;
+  position: relative;
+}
+.speech-bubble::before {
+  content: '';
+  position: absolute; bottom: 12px; left: -10px;
+  border: 6px solid transparent;
+  border-right-color: var(--pink-soft);
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute; bottom: 13px; left: -7px;
+  border: 5px solid transparent;
+  border-right-color: var(--pink-pale);
+}
+#hearts-layer {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+
+/* Puppy animations */
+@keyframes tail {
+  0%,100% { transform: rotate(-18deg); }
+  50% { transform: rotate(22deg); }
+}
+@keyframes earL {
+  0%,100% { transform: rotate(-6deg); }
+  50% { transform: rotate(9deg); }
+}
+@keyframes celebrate {
+  0% { transform: scale(1) rotate(0); }
+  20% { transform: scale(1.12) rotate(-12deg); }
+  40% { transform: scale(1.15) rotate(10deg); }
+  60% { transform: scale(1.08) rotate(-8deg); }
+  80% { transform: scale(1.12) rotate(6deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes jump {
+  0%,100% { transform: translateY(0); }
+  35% { transform: translateY(-20px); }
+  65% { transform: translateY(-8px); }
+}
+@keyframes heartFloat {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx,0px), -70px) scale(1.5); }
+}
+@keyframes popIn {
+  0% { opacity:0; transform: scale(0.4) translateY(30px); }
+  65% { transform: scale(1.08) translateY(-6px); }
+  100% { opacity:1; transform: scale(1) translateY(0); }
+}
+@keyframes dots {
+  0%   { content: ''; }
+  33%  { content: '・'; }
+  66%  { content: '・・'; }
+  100% { content: '・・・'; }
+}
+.loading-dots::after { content: ''; animation: dots 1s steps(3) infinite; }
+
+.idle #dog-tail { animation: tail 1.1s ease-in-out infinite; transform-origin: center bottom; }
+.idle #dog-ear-l { animation: earL 1.9s ease-in-out infinite; transform-origin: center top; }
+.celebrate #puppy-svg { animation: celebrate 0.7s ease-in-out; }
+.jumping #puppy-svg { animation: jump 0.55s ease-in-out; }
+.popin #puppy-svg { animation: popIn 0.65s cubic-bezier(.34,1.56,.64,1); }
+
+.heart-p {
+  position: absolute; font-size: 1.4rem;
+  animation: heartFloat 0.9s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ====== QUICK TAGS ====== */
+.section-label {
+  font-size: 0.78rem; font-weight: 700; color: var(--text2);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.tags-scroll {
+  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -16px; padding: 0 16px 8px;
+}
+.tags-scroll::-webkit-scrollbar { display: none; }
+.tag-chip {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  background: white;
+  border: 2px solid var(--orange-soft);
+  border-radius: 999px;
+  font-size: 0.8rem; color: var(--text2);
+  cursor: pointer; transition: all 0.15s;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(196,122,58,0.08);
+}
+.tag-chip.on {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: white;
+  box-shadow: 0 3px 10px rgba(255,140,66,0.35);
+  transform: scale(1.04);
+}
+
+/* ====== TEXTAREA ====== */
+.diary-card {
+  background: white; border-radius: var(--radius);
+  padding: 18px; margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(196,122,58,0.10);
+}
+.diary-card h2 {
+  font-family: 'Kaisei Decol', serif;
+  font-size: 1rem; color: var(--orange);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+#diary-text {
+  width: 100%; min-height: 90px;
+  border: 2px solid var(--orange-soft);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-size: 0.95rem; color: var(--text);
+  resize: none; outline: none;
+  background: var(--cream2);
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  line-height: 1.6;
+}
+#diary-text:focus { border-color: var(--orange); }
+
+/* ====== MOOD SELECTOR ====== */
+.mood-row {
+  display: flex; justify-content: space-between;
+  margin: 14px 0;
+}
+.mood-btn {
+  width: 52px; height: 52px;
+  border-radius: 50%; border: 3px solid transparent;
+  background: var(--cream2); cursor: pointer;
+  font-size: 1.7rem; transition: all 0.18s;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(196,122,58,0.10);
+  -webkit-appearance: none;
+}
+.mood-btn:active { transform: scale(0.9); }
+.mood-btn.on {
+  border-color: var(--orange);
+  background: var(--orange-soft);
+  transform: scale(1.18);
+  box-shadow: 0 4px 14px rgba(255,140,66,0.35);
+}
+
+/* ====== SUBMIT BUTTON ====== */
+.submit-btn {
+  width: 100%; padding: 17px;
+  background: linear-gradient(135deg, var(--orange), var(--orange2));
+  color: white; border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Kaisei Decol', serif;
+  font-size: 1.1rem; cursor: pointer;
+  box-shadow: 0 5px 18px rgba(255,140,66,0.42);
+  transition: all 0.18s;
+  letter-spacing: 0.04em;
+  -webkit-appearance: none;
+  position: relative; overflow: hidden;
+}
+.submit-btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+.submit-btn:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(255,140,66,0.3); }
+.submit-btn:disabled { opacity: 0.55; pointer-events: none; }
+
+/* ====== HISTORY ====== */
+.entry-card {
+  background: white; border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(196,122,58,0.10);
+  border-left: 5px solid var(--orange);
+  position: relative; overflow: hidden;
+}
+.entry-card::before {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 60px; height: 60px;
+  background: radial-gradient(circle at 100% 0%, rgba(255,140,66,0.06), transparent);
+}
+.entry-meta {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.entry-mood { font-size: 1.4rem; }
+.entry-date { font-size: 0.72rem; color: var(--text3); flex: 1; }
+.share-mini-btn {
+  padding: 5px 11px; border-radius: 999px;
+  border: 1.5px solid var(--orange-soft);
+  background: none; cursor: pointer;
+  font-size: 0.7rem; color: var(--text3);
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+}
+.share-mini-btn.done { border-color: var(--green); color: var(--green); }
+.entry-body { font-size: 0.88rem; line-height: 1.65; color: var(--text); margin-bottom: 10px; }
+.entry-praise-box {
+  background: linear-gradient(135deg, var(--pink-pale), var(--orange-pale));
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.praise-dog { font-size: 1.1rem; flex-shrink: 0; }
+.praise-text { font-size: 0.82rem; color: var(--pink); font-weight: 700; line-height: 1.55; }
+
+/* ====== SNS ====== */
+.sns-card {
+  background: white; border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(196,122,58,0.10);
+}
+.sns-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sns-ava {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--orange2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(255,140,66,0.28);
+}
+.sns-user-info { flex: 1; }
+.sns-user-info strong { font-size: 0.88rem; display: block; }
+.sns-user-info span { font-size: 0.7rem; color: var(--text3); }
+.sns-body { font-size: 0.87rem; line-height: 1.65; margin-bottom: 10px; }
+.sns-praise-box {
+  background: linear-gradient(135deg, var(--pink-pale), var(--orange-pale));
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-size: 0.82rem; color: var(--pink); font-weight: 700;
+  margin-bottom: 10px; line-height: 1.55;
+}
+.sns-actions { display: flex; gap: 8px; }
+.action-pill {
+  padding: 7px 14px; border-radius: 999px;
+  border: 1.5px solid var(--orange-soft);
+  background: var(--cream2); cursor: pointer;
+  font-size: 0.78rem; color: var(--text2);
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-weight: 500; transition: all 0.15s;
+  display: flex; align-items: center; gap: 4px;
+}
+.action-pill:active { transform: scale(0.95); }
+.action-pill.liked { background: var(--pink-pale); border-color: var(--pink); color: var(--pink); }
+.action-pill.cheered { background: #EDFFF0; border-color: var(--green); color: var(--green); }
+
+/* ====== STAFF ====== */
+.staff-card {
+  background: white; border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(196,122,58,0.10);
+}
+.staff-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.staff-ava {
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+.staff-name strong { font-size: 0.92rem; display: block; }
+.staff-name span { font-size: 0.7rem; color: var(--text3); }
+.status-tag {
+  margin-left: auto; padding: 5px 12px;
+  border-radius: 999px; font-size: 0.72rem; font-weight: 700;
+}
+.s-good { background: #E6F9EA; color: #2A7A3A; }
+.s-watch { background: #FFF8DC; color: #996800; }
+.s-alert { background: #FFE8EE; color: #C00040; }
+
+.week-dots {
+  display: flex; gap: 5px; margin-bottom: 10px; align-items: center;
+}
+.w-dot {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 0.55rem; font-weight: 700; color: white; gap: 1px;
+}
+.w-dot .d-label { font-size: 0.6rem; }
+.w-dot .d-mark { font-size: 0.8rem; }
+.dot-on { background: var(--green); }
+.dot-off { background: #E0D4C8; color: var(--text3); }
+.streak-badge {
+  margin-left: auto; font-size: 0.78rem; color: var(--orange); font-weight: 700;
+}
+
+.last-entry {
+  background: var(--cream2); border-radius: var(--radius-sm);
+  padding: 10px 12px; font-size: 0.8rem; color: var(--text2); line-height: 1.55;
+}
+.last-entry.warn { background: #FFF0F3; color: #B00030; }
+
+/* ====== EMPTY STATE ====== */
+.empty {
+  text-align: center; padding: 44px 20px;
+  color: var(--text3);
+}
+.empty .emoji { font-size: 3.5rem; margin-bottom: 12px; }
+.empty p { font-size: 0.85rem; line-height: 1.75; }
+
+/* ====== SECTION CARD ====== */
+.section-card {
+  background: white; border-radius: var(--radius);
+  padding: 16px; margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(196,122,58,0.10);
+}
+.section-card h2 {
+  font-family: 'Kaisei Decol', serif;
+  font-size: 1rem; color: var(--orange);
+  margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+}
+.section-card p { font-size: 0.78rem; color: var(--text3); line-height: 1.6; }
+
+/* ====== TOAST ====== */
+#toast {
+  position: fixed; bottom: calc(70px + var(--safe-bottom));
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(45,26,10,0.9); color: white;
+  padding: 10px 22px; border-radius: 999px;
+  font-size: 0.82rem; z-index: 999;
+  opacity: 0; transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+  white-space: nowrap; backdrop-filter: blur(8px);
+  max-width: calc(100vw - 40px);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ====== SLIDE UP ANIM ====== */
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(16px); }
+  to { opacity:1; transform: translateY(0); }
+}
+.slide { animation: slideUp 0.35s ease-out; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <div class="status-bar"></div>
+
+  <!-- HEADER -->
+  <div class="app-header">
+    <div class="header-title">
+      <h1>🐾 ほめほめワン日記</h1>
+      <p>今日のあなたを全力で褒めてあげる</p>
+    </div>
+    <div class="streak-pill">
+      <div class="streak-num" id="streak-num">1</div>
+      <div class="streak-label">日連続🔥</div>
+    </div>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div class="scroll-area" id="scroll-area">
+
+    <!-- TAB: 日記 -->
+    <div class="tab-content active" id="tab-diary">
+
+      <!-- 子犬ヒーロー -->
+      <div class="puppy-hero">
+        <div class="puppy-hero-top-bar"></div>
+        <div id="hearts-layer"></div>
+        <div class="puppy-hero-inner">
+          <div class="puppy-wrap">
+            <div id="puppy-state" class="idle">
+              <svg id="puppy-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="100" cy="186" rx="36" ry="7" fill="rgba(196,122,58,0.13)"/>
+                <g id="dog-tail" transform-origin="84 148">
+                  <path d="M84 148 Q56 133 51 110 Q48 96 60 93 Q72 91 76 107 Q80 120 87 133Z" fill="#C47A3A" stroke="#A86228" stroke-width="1.5"/>
+                </g>
+                <ellipse cx="102" cy="150" rx="41" ry="33" fill="#D4944A"/>
+                <ellipse cx="102" cy="150" rx="37" ry="29" fill="#E8A85C"/>
+                <ellipse cx="103" cy="160" rx="23" ry="17" fill="#F5C878"/>
+                <rect x="72" y="167" width="17" height="25" rx="8.5" fill="#D4944A"/>
+                <rect x="72" y="184" width="17" height="10" rx="5" fill="#C47A3A"/>
+                <rect x="114" y="167" width="17" height="25" rx="8.5" fill="#D4944A"/>
+                <rect x="114" y="184" width="17" height="10" rx="5" fill="#C47A3A"/>
+                <ellipse cx="102" cy="118" rx="21" ry="13" fill="#E8A85C"/>
+                <circle cx="102" cy="97" r="35" fill="#E8A85C"/>
+                <g id="dog-ear-l" transform-origin="75 76">
+                  <ellipse cx="74" cy="75" rx="17" ry="23" fill="#C47A3A" transform="rotate(-14,74,75)"/>
+                  <ellipse cx="74" cy="77" rx="10" ry="16" fill="#B86828" transform="rotate(-14,74,77)"/>
+                </g>
+                <ellipse cx="130" cy="75" rx="17" ry="23" fill="#C47A3A" transform="rotate(14,130,75)"/>
+                <ellipse cx="130" cy="77" rx="10" ry="16" fill="#B86828" transform="rotate(14,130,77)"/>
+                <circle cx="88" cy="89" r="9" fill="#2D1A0A"/>
+                <circle cx="116" cy="89" r="9" fill="#2D1A0A"/>
+                <circle cx="91" cy="86" r="3.5" fill="white"/>
+                <circle cx="119" cy="86" r="3.5" fill="white"/>
+                <circle cx="92" cy="87" r="1.5" fill="white" opacity="0.55"/>
+                <circle cx="120" cy="87" r="1.5" fill="white" opacity="0.55"/>
+                <ellipse cx="102" cy="103" rx="9" ry="6" fill="#2D1A0A"/>
+                <ellipse cx="99" cy="101" rx="2.5" ry="1.5" fill="white" opacity="0.38"/>
+                <path d="M95 111 Q102 119 109 111" stroke="#2D1A0A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <circle cx="80" cy="106" r="7.5" fill="#FF9999" opacity="0.32"/>
+                <circle cx="124" cy="106" r="7.5" fill="#FF9999" opacity="0.32"/>
+                <rect x="84" y="117" width="36" height="10" rx="5" fill="#FF6B8A"/>
+                <circle cx="102" cy="122" r="3.5" fill="#FFD700"/>
+              </svg>
+            </div>
+          </div>
+          <div class="speech-wrap">
+            <div class="speech-bubble" id="speech-bubble">
+              今日もいるよ〜！なんでも話してね 🐾
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- クイックタグ -->
+      <div style="padding: 0 0 4px;">
+        <div class="section-label">📌 今日できたこと（タップで選択）</div>
+        <div class="tags-scroll" id="tags-row">
+          <span class="tag-chip" data-v="朝起きた">☀️ 朝起きた</span>
+          <span class="tag-chip" data-v="食事した">🍱 食事した</span>
+          <span class="tag-chip" data-v="散歩した">🚶 散歩した</span>
+          <span class="tag-chip" data-v="作業した">💼 作業した</span>
+          <span class="tag-chip" data-v="休めた">😴 休めた</span>
+          <span class="tag-chip" data-v="薬を飲んだ">💊 薬を飲んだ</span>
+          <span class="tag-chip" data-v="誰かと話した">💬 話した</span>
+          <span class="tag-chip" data-v="好きなことした">🌟 好きなこと</span>
+          <span class="tag-chip" data-v="外に出た">🌳 外に出た</span>
+          <span class="tag-chip" data-v="お風呂入った">🛁 お風呂</span>
+        </div>
+      </div>
+
+      <!-- テキスト入力 -->
+      <div class="diary-card">
+        <h2>✏️ 今日のひとこと</h2>
+        <textarea id="diary-text" placeholder="タグで選ぶだけでもOK！自由に書いてもいいよ。どんな小さなことでもぜんぶえらい！"></textarea>
+
+        <div style="margin-top:14px;">
+          <div class="section-label" style="justify-content:center;">今の気持ちは？</div>
+          <div class="mood-row" id="mood-row">
+            <button class="mood-btn" data-m="😄">😄</button>
+            <button class="mood-btn" data-m="🙂">🙂</button>
+            <button class="mood-btn" data-m="😐">😐</button>
+            <button class="mood-btn" data-m="😔">😔</button>
+            <button class="mood-btn" data-m="😭">😭</button>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="submit-btn" onclick="submitDiary()">
+          🐶 わんちゃんに報告する！
+        </button>
+      </div>
+
+    </div>
+
+    <!-- TAB: 履歴 -->
+    <div class="tab-content" id="tab-history">
+      <div class="section-card">
+        <h2>📖 これまでの記録</h2>
+        <p>あなたの小さな積み重ねが、ここに刻まれています。</p>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- TAB: SNS -->
+    <div class="tab-content" id="tab-sns">
+      <div class="section-card">
+        <h2>🌸 みんなの「できた！」</h2>
+        <p>顔は出さなくていい。子犬があなたの代わりに伝えてくれます。</p>
+      </div>
+      <div id="sns-feed"></div>
+    </div>
+
+    <!-- TAB: スタッフ -->
+    <div class="tab-content" id="tab-staff">
+      <div class="section-card" style="background: linear-gradient(135deg,#F0F8FF,#FFF0F8);">
+        <h2>👩‍⚕️ スタッフモニタリング</h2>
+        <p>利用者の記録状況と傾向を把握できます。記録が途切れた方へのサポートを検討してください。</p>
+      </div>
+      <div id="staff-list"></div>
+    </div>
+
+  </div><!-- /scroll-area -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('diary',this)">
+      <span class="nav-icon">🐶</span>
+      <span class="nav-label">日記</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('history',this)">
+      <span class="nav-icon">📖</span>
+      <span class="nav-label">履歴</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('sns',this)">
+      <span class="nav-icon">🌸</span>
+      <span class="nav-label">みんな</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('staff',this)">
+      <span class="nav-icon">👩‍⚕️</span>
+      <span class="nav-label">スタッフ</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+// ====== STATE ======
+let mood = '🙂';
+let tags = [];
+let entries = [];
+let streak = 1;
+
+const demoSNS = [
+  { id:1, ava:'🐶', name:'ポチのともだち', time:'10分前', body:'今日は朝ごはんを食べた！えらい自分！', praise:'わあーー！朝ごはん食べたんだね！すごいすごい！ちゃんと体に栄養いれてえらいよー！🐾🐾', likes:12, liked:false, cheered:false },
+  { id:2, ava:'🐕', name:'シロのひと', time:'1時間前', body:'作業所で折り紙を2枚折った。手が少し震えてたけど頑張った。', praise:'ふるえる手でも折れたの！？それって本当にすごいこと！2枚も！ぼく感動して思わず走り回っちゃった！🏃💨', likes:24, liked:false, cheered:false },
+  { id:3, ava:'🦮', name:'ハナのパートナー', time:'3時間前', body:'外に出れた。コンビニまでだけど。', praise:'コンビニまで行けたんだ！外に出るって実はとっても大変なのに、やりとげたね！ハグしたいくらいえらい！🤗✨', likes:31, liked:false, cheered:false },
+  { id:4, ava:'🐩', name:'クロのかけら', time:'昨日', body:'今日は布団から出られなかったけど、水だけ飲んだ。', praise:'水飲んだ！それで十分だよ！体が「生きよう」って言ったから飲めたんだよ。それだけでぼく嬉しくて尻尾ちぎれそう！💕', likes:58, liked:false, cheered:false },
+];
+
+const demoStaff = [
+  { name:'田中 A さん', ava:'🌸', bg:'#FFF0F5', last:'今日は作業所で缶バッジを5個作れました', streak:7, week:[1,1,1,1,1,0,1], status:'good', stxt:'良好' },
+  { name:'佐藤 B さん', ava:'⭐', bg:'#FFFAEC', last:'少し頭が痛かったけど休憩しながら参加できた', streak:3, week:[0,1,0,1,1,0,0], status:'watch', stxt:'要観察' },
+  { name:'山田 C さん', ava:'🌙', bg:'#F0F4FF', last:'', streak:0, week:[0,0,0,0,0,0,0], status:'alert', stxt:'要サポート' },
+];
+
+// ====== TABS ======
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('scroll-area').scrollTop = 0;
+  if (name === 'history') renderHistory();
+  if (name === 'sns') renderSNS();
+  if (name === 'staff') renderStaff();
+}
+
+// ====== TAGS ======
+document.getElementById('tags-row').addEventListener('click', e => {
+  const chip = e.target.closest('.tag-chip');
+  if (!chip) return;
+  chip.classList.toggle('on');
+  const v = chip.dataset.v;
+  if (chip.classList.contains('on')) {
+    tags.push(v);
+    const ta = document.getElementById('diary-text');
+    ta.value += (ta.value ? '、' : '') + v;
+  } else {
+    tags = tags.filter(t => t !== v);
+  }
+});
+
+// ====== MOOD ======
+document.getElementById('mood-row').addEventListener('click', e => {
+  const btn = e.target.closest('.mood-btn');
+  if (!btn) return;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  mood = btn.dataset.m;
+});
+
+// ====== PUPPY UTILS ======
+function setSpeech(text) {
+  document.getElementById('speech-bubble').textContent = text;
+}
+function setLoadingSpeech() {
+  document.getElementById('speech-bubble').innerHTML = '<span class="loading-dots">読んでるよ</span>';
+}
+function setPuppyAnim(cls, duration) {
+  const s = document.getElementById('puppy-state');
+  s.className = '';
+  void s.offsetWidth;
+  s.className = cls;
+  if (duration) setTimeout(() => { s.className = 'idle'; }, duration);
+}
+function spawnHearts(n = 6) {
+  const layer = document.getElementById('hearts-layer');
+  const hs = ['❤️','💕','🧡','💛','✨','⭐','💜'];
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => {
+      const h = document.createElement('div');
+      h.className = 'heart-p';
+      h.textContent = hs[Math.floor(Math.random() * hs.length)];
+      const lp = 15 + Math.random() * 70;
+      const dx = (Math.random() * 40 - 20);
+      h.style.left = lp + '%';
+      h.style.bottom = '20px';
+      h.style.setProperty('--dx', dx + 'px');
+      layer.appendChild(h);
+      setTimeout(() => h.remove(), 950);
+    }, i * 110);
+  }
+}
+
+// ====== SUBMIT ======
+async function submitDiary() {
+  const text = document.getElementById('diary-text').value.trim() ||
+    (tags.length ? tags.join('、') : '');
+  if (!text) {
+    setPuppyAnim('jumping', 800);
+    setSpeech('なにか書いてくれると嬉しいな〜！🐾');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  setLoadingSpeech();
+
+  let praise = '';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        system: `あなたは「ほめほめワン」という子犬のキャラクターです。
+ユーザーが日記に書いた内容を読んで全力で褒めてください。
+・子犬らしい元気で明るいトーンで
+・どんな小さなことでも「すごい！」「えらい！」と全力肯定
+・絵文字を2〜3個使う（🐾❤️✨など）
+・2〜3文で完結させる
+・うつや発達障がいなど傷つきやすい人も読むので温かく優しく
+・「だね！」「だよ！」などフレンドリーな語尾
+褒めメッセージだけ返す。前置き不要。`,
+        messages: [{ role: 'user', content: `今日できたこと：${text}\n気持ち：${mood}` }]
+      })
+    });
+    const data = await res.json();
+    praise = data?.content?.[0]?.text || 'えらい！今日もがんばったね！ぼく嬉しくて跳び回ってる！🐾✨';
+  } catch {
+    praise = '今日もよく頑張ったね！どんな小さなことでも、ちゃんと見てるよ！えらい！🐾✨';
+  }
+
+  spawnHearts(9);
+  setTimeout(() => spawnHearts(5), 450);
+  setPuppyAnim('celebrate', 2800);
+  setSpeech(praise);
+
+  const entry = {
+    id: Date.now(), text, mood, praise,
+    date: new Date(), tags: [...tags], shared: false
+  };
+  entries.unshift(entry);
+  streak++;
+  document.getElementById('streak-num').textContent = streak;
+
+  // reset
+  document.getElementById('diary-text').value = '';
+  tags = [];
+  mood = '🙂';
+  document.querySelectorAll('.tag-chip').forEach(c => c.classList.remove('on'));
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('on'));
+  btn.disabled = false;
+  showToast('記録したよ！わんわん🐶');
+
+  setTimeout(() => {
+    setPuppyAnim('idle');
+    setSpeech('また話してね！毎日ここにいるよ🐾');
+  }, 3500);
+}
+
+// ====== HISTORY ======
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (!entries.length) {
+    el.innerHTML = `<div class="empty"><div class="emoji">🐾</div><p>まだ記録がないよ！<br>「日記」タブから最初の一歩を！</p></div>`;
+    return;
+  }
+  el.innerHTML = entries.map(e => `
+    <div class="entry-card slide">
+      <div class="entry-meta">
+        <span class="entry-mood">${e.mood}</span>
+        <span class="entry-date">${fmt(e.date)}</span>
+        ${!e.shared
+          ? `<button class="share-mini-btn" onclick="shareEntry(${e.id},this)">みんなに見せる</button>`
+          : `<button class="share-mini-btn done" disabled>🌸 シェア済み</button>`}
+      </div>
+      <div class="entry-body">${e.text}</div>
+      <div class="entry-praise-box">
+        <span class="praise-dog">🐶</span>
+        <span class="praise-text">${e.praise}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function shareEntry(id, btn) {
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  e.shared = true;
+  demoSNS.unshift({ id: Date.now(), ava:'🐶', name:'あなた', time:'たった今', body: e.text, praise: e.praise, likes: 0, liked: false, cheered: false });
+  btn.className = 'share-mini-btn done';
+  btn.disabled = true;
+  btn.textContent = '🌸 シェア済み';
+  showToast('みんなに見せたよ！🌸');
+}
+
+// ====== SNS ======
+function renderSNS() {
+  document.getElementById('sns-feed').innerHTML = demoSNS.map(p => `
+    <div class="sns-card slide">
+      <div class="sns-header">
+        <div class="sns-ava">${p.ava}</div>
+        <div class="sns-user-info">
+          <strong>${p.name}</strong>
+          <span>${p.time}</span>
+        </div>
+      </div>
+      <div class="sns-body">${p.body}</div>
+      <div class="sns-praise-box">🐾 ${p.praise}</div>
+      <div class="sns-actions">
+        <button class="action-pill ${p.liked?'liked':''}" onclick="likePost(${p.id},this)">
+          ${p.liked?'❤️':'🤍'} ${p.likes}
+        </button>
+        <button class="action-pill ${p.cheered?'cheered':''}" onclick="cheerPost(${p.id},this)">
+          🎉 ${p.cheered?'応援した！':'応援する'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function likePost(id, btn) {
+  const p = demoSNS.find(x => x.id === id);
+  if (!p) return;
+  p.liked = !p.liked;
+  p.likes += p.liked ? 1 : -1;
+  btn.className = 'action-pill' + (p.liked ? ' liked' : '');
+  btn.innerHTML = (p.liked ? '❤️' : '🤍') + ' ' + p.likes;
+  if (p.liked) showToast('応援したよ！💕');
+}
+function cheerPost(id, btn) {
+  const p = demoSNS.find(x => x.id === id);
+  if (!p || p.cheered) return;
+  p.cheered = true;
+  btn.className = 'action-pill cheered';
+  btn.textContent = '🎉 応援した！';
+  showToast('がんばれ〜！🎉');
+}
+
+// ====== STAFF ======
+function renderStaff() {
+  const days = ['月','火','水','木','金','土','日'];
+  document.getElementById('staff-list').innerHTML = demoStaff.map(u => `
+    <div class="staff-card slide">
+      <div class="staff-row">
+        <div class="staff-ava" style="background:${u.bg}">${u.ava}</div>
+        <div class="staff-name">
+          <strong>${u.name}</strong>
+          <span>直近7日間の活動</span>
+        </div>
+        <span class="status-tag s-${u.status}">${u.stxt}</span>
+      </div>
+      <div class="week-dots">
+        ${u.week.map((a,i) => `
+          <div class="w-dot ${a?'dot-on':'dot-off'}">
+            <span class="d-label">${days[i]}</span>
+            <span class="d-mark">${a?'✓':'–'}</span>
+          </div>
+        `).join('')}
+        <div class="streak-badge">🔥${u.streak}日</div>
+      </div>
+      <div class="last-entry${u.last?'':' warn'}">
+        ${u.last
+          ? `<strong style="color:var(--orange)">最新：</strong>${u.last}`
+          : '⚠️ 1週間記録がありません。声かけを検討してください。'}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ====== UTILS ======
+function fmt(d) {
+  const diff = Math.floor((Date.now() - d) / 60000);
+  if (diff < 1) return 'たった今';
+  if (diff < 60) return `${diff}分前`;
+  if (diff < 1440) return `${Math.floor(diff/60)}時間前`;
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ====== INIT ======
+entries.push({
+  id: 1, text:'今日は朝起きてご飯を食べた。少し散歩もできた。', mood:'🙂',
+  praise:'朝起きてご飯まで食べたの！？すごいすごい！散歩まで！！ぼく嬉しくて飛び跳ねてる！🐾❤️✨',
+  date: new Date(Date.now() - 3600000), tags:['朝起きた','食事した','散歩した'], shared: false
+});
+</script>
+</body>
+</html>
